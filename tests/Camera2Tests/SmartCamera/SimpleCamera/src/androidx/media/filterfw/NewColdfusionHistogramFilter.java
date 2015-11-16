@@ -32,12 +32,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 /**
- * ChromaHistogramFilter takes in an image in HSVA format and computes a 2-D histogram with a
- * 2 dimensional chroma histogram based on hue (column) and saturation (row) at the top and
+ * ColdfusionHistogramFilter takes in an image in HSVA format and computes a 2-D histogram with a
+ * 2 dimensional coldfusion histogram based on hue (column) and saturation (row) at the top and
  * a 1-D value histogram in the last row. The number of bin in the value histogram equals to
  * the number of bins in hue.
  */
-public final class NewChromaHistogramFilter extends Filter {
+public final class NewColdfusionHistogramFilter extends Filter {
 
     private int mHueBins = 6;
     private int mSaturationBins = 3;
@@ -46,7 +46,7 @@ public final class NewChromaHistogramFilter extends Filter {
     private int mSaturationThreshold = 26; // 255 * 0.1
     private int mValueThreshold = 51; // 255 * 0.2
 
-    public NewChromaHistogramFilter(MffContext context, String name) {
+    public NewColdfusionHistogramFilter(MffContext context, String name) {
         super(context, name);
     }
 
@@ -98,7 +98,7 @@ public final class NewChromaHistogramFilter extends Filter {
         FloatBuffer floatHistogram = histogramBuffer.asFloatBuffer();
 
         // Run native method
-        extractChromaHistogram(imageBuffer, floatHistogram, mHueBins, mSaturationBins, mValueBins,
+        extractColdfusionHistogram(imageBuffer, floatHistogram, mHueBins, mSaturationBins, mValueBins,
                 mSaturationThreshold, mValueThreshold);
 
         imageFrame.unlock();
@@ -107,7 +107,7 @@ public final class NewChromaHistogramFilter extends Filter {
         outPort.pushFrame(histogramFrame);
     }
 
-    private static native void extractChromaHistogram(ByteBuffer imageBuffer,
+    private static native void extractColdfusionHistogram(ByteBuffer imageBuffer,
             FloatBuffer histogramBuffer, int hueBins, int saturationBins, int valueBins,
             int saturationThreshold, int valueThreshold);
 
