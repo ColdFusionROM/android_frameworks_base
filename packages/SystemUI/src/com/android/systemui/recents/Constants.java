@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -13,32 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.recents;
-
 /**
  * Constants
  */
 public class Constants {
-
     public static class Metrics {
         // DO NOT MODIFY THE ORDER OF THESE METRICS
         public static final int DismissSourceKeyboard = 0;
         public static final int DismissSourceSwipeGesture = 1;
         public static final int DismissSourceHeaderButton = 2;
     }
-
     public static class DebugFlags {
         // Enable this with any other debug flag to see more info
         public static final boolean Verbose = false;
-
         public static class App {
             // Enables debug drawing for the transition thumbnail
             public static final boolean EnableTransitionThumbnailDebugMode = false;
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
             // Enables dismiss-all
-            public static final boolean EnableDismissAll = true;
+            public static final boolean EnableDismissAll = false;
             // Enables debug mode
             public static final boolean EnableDebugMode = false;
             // Enables the search bar layout
@@ -59,22 +55,13 @@ public class Constants {
             public static final int SystemServicesProxyMockPackageCount = 3;
             // Defines the number of mock recents tasks to create
             public static final int SystemServicesProxyMockTaskCount = 100;
-            // clear button location
-            public static final int RECENTS_CLEAR_ALL_TOP_RIGHT    = 0;
-            public static final int RECENTS_CLEAR_ALL_TOP_LEFT     = 1;
-            public static final int RECENTS_CLEAR_ALL_TOP_CENTER   = 2;
-            public static final int RECENTS_CLEAR_ALL_BOTTOM_RIGHT = 3;
-            public static final int RECENTS_CLEAR_ALL_BOTTOM_LEFT  = 4;
-            public static final int RECENTS_CLEAR_ALL_BOTTOM_CENTER  = 5;
         }
     }
-
     public static class Values {
         public static class App {
             public static int AppWidgetHostId = 1024;
             public static String DebugModeVersion = "A";
         }
-
         public static class TaskStackView {
             public static final int TaskStackMinOverscrollRange = 32;
             public static final int TaskStackMaxOverscrollRange = 128;

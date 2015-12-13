@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.recents.views;
-
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.content.Context;
@@ -31,13 +29,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -48,19 +44,15 @@ import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
 public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks,
         RecentsPackageMonitor.PackageCallbacks {
-
     private static final String TAG = "RecentsView";
-
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
         public void onTaskViewClicked();
@@ -71,52 +63,40 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void onTaskResize(Task t);
         public void runAfterPause(Runnable r);
     }
-
     RecentsConfiguration mConfig;
     LayoutInflater mInflater;
     DebugOverlayView mDebugOverlay;
     RecentsViewLayoutAlgorithm mLayoutAlgorithm;
-
     ArrayList<TaskStack> mStacks;
     List<TaskStackView> mTaskStackViews = new ArrayList<>();
     RecentsAppWidgetHostView mSearchBar;
     RecentsViewCallbacks mCb;
-    View mClearRecents;
-    View mFloatingButton;
-
     public RecentsView(Context context) {
         super(context);
     }
-
     public RecentsView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
-
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
         mLayoutAlgorithm = new RecentsViewLayoutAlgorithm(mConfig);
     }
-
     /** Sets the callbacks */
     public void setCallbacks(RecentsViewCallbacks cb) {
         mCb = cb;
     }
-
     /** Sets the debug overlay */
     public void setDebugOverlay(DebugOverlayView overlay) {
         mDebugOverlay = overlay;
     }
-
     /** Set/get the bsp root node */
     public void setTaskStacks(ArrayList<TaskStack> stacks) {
         int numStacks = stacks.size();
-
         // Remove all/extra stack views
         int numTaskStacksToKeep = 0; // Keep no tasks if we are recreating the layout
         if (mConfig.launchedReuseTaskStackViews) {
@@ -125,7 +105,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         for (int i = mTaskStackViews.size() - 1; i >= numTaskStacksToKeep; i--) {
             removeView(mTaskStackViews.remove(i));
         }
-
         // Update the stack views that we are keeping
         for (int i = 0; i < numTaskStacksToKeep; i++) {
             TaskStackView tsv = mTaskStackViews.get(i);
@@ -133,7 +112,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             tsv.reset();
             tsv.setStack(stacks.get(i));
         }
-
         // Add remaining/recreate stack views
         mStacks = stacks;
         for (int i = mTaskStackViews.size(); i < numStacks; i++) {
@@ -143,7 +121,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             addView(stackView);
             mTaskStackViews.add(stackView);
         }
-
         // Enable debug mode drawing on all the stacks if necessary
         if (mConfig.debugModeEnabled) {
             for (int i = mTaskStackViews.size() - 1; i >= 0; i--) {
@@ -151,16 +128,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 stackView.setDebugOverlay(mDebugOverlay);
             }
         }
-
         // Trigger a new layout
         requestLayout();
     }
-
     /** Gets the list of task views */
     List<TaskStackView> getTaskStackViews() {
         return mTaskStackViews;
     }
-
     /** Gets the next task in the stack - or if the last - the top task */
     public Task getNextTaskOrTopTask(Task taskToSearch) {
         Task returnTask = null; 
@@ -185,7 +159,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         return returnTask;
     }
-
     /** Launches the focused task from the first stack if possible */
     public boolean launchFocusedTask() {
         // Get the first stack view
@@ -208,7 +181,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         return false;
     }
-
     /** Launches a given task. */
     public boolean launchTask(Task task) {
         // Get the first stack view
@@ -230,7 +202,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         return false;
     }
-
     /** Launches the task that Recents was launched from, if possible */
     public boolean launchPreviousTask() {
         // Get the first stack view
@@ -240,7 +211,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             TaskStackView stackView = stackViews.get(i);
             TaskStack stack = stackView.getStack();
             ArrayList<Task> tasks = stack.getTasks();
-
             // Find the launch task in the stack
             if (!tasks.isEmpty()) {
                 int taskCount = tasks.size();
@@ -256,13 +226,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         return false;
     }
-
     /** Requests all task stacks to start their enter-recents animation */
     public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         // We have to increment/decrement the post animation trigger in case there are no children
         // to ensure that it runs
         ctx.postAnimationTrigger.increment();
-
         List<TaskStackView> stackViews = getTaskStackViews();
         int stackCount = stackViews.size();
         for (int i = 0; i < stackCount; i++) {
@@ -271,7 +239,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         ctx.postAnimationTrigger.decrement();
     }
-
     /** Requests all task stacks to start their exit-recents animation */
     public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         // We have to increment/decrement the post animation trigger in case there are no children
@@ -284,11 +251,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             stackView.startExitToHomeAnimation(ctx);
         }
         ctx.postAnimationTrigger.decrement();
-
         // Notify of the exit animation
         mCb.onExitToHomeAnimationTriggered();
     }
-
     /** Adds the search bar */
     public void setSearchBar(RecentsAppWidgetHostView searchBar) {
         // Remove the previous search bar if one exists
@@ -301,12 +266,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             addView(mSearchBar);
         }
     }
-
     /** Returns whether there is currently a search bar */
     public boolean hasValidSearchBar() {
         return mSearchBar != null && !mSearchBar.isReinflateRequired();
     }
-
     /** Sets the visibility of the search bar */
     public void setSearchBarVisibility(int visibility) {
         if (mSearchBar != null) {
@@ -315,7 +278,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mSearchBar.bringToFront();
         }
     }
-
     /**
      * This is called with the full size of the window since we are handling our own insets.
      */
@@ -323,7 +285,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-
         // Get the search bar bounds and measure the search bar layout
         Rect searchBarSpaceBounds = new Rect();
         if (mSearchBar != null) {
@@ -332,48 +293,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.height(), MeasureSpec.EXACTLY));
         }
-
-        boolean showClearAllRecents = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.SHOW_CLEAR_ALL_RECENTS, 0, UserHandle.USER_CURRENT) != 0;
-
         Rect taskStackBounds = new Rect();
         mConfig.getAvailableTaskStackBounds(width, height, mConfig.systemInsets.top,
                 mConfig.systemInsets.right, searchBarSpaceBounds, taskStackBounds);
-
-        if (mFloatingButton != null && showClearAllRecents) {
-            int clearRecentsLocation = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.RECENTS_CLEAR_ALL_LOCATION,
-            Constants.DebugFlags.App.RECENTS_CLEAR_ALL_BOTTOM_RIGHT, UserHandle.USER_CURRENT);
-
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)
-                    mFloatingButton.getLayoutParams();
-            params.topMargin = taskStackBounds.top;
-            switch (clearRecentsLocation) {
-                case Constants.DebugFlags.App.RECENTS_CLEAR_ALL_TOP_LEFT:
-                    params.gravity = Gravity.TOP | Gravity.LEFT;
-                    break;
-                case Constants.DebugFlags.App.RECENTS_CLEAR_ALL_TOP_RIGHT:
-                    params.gravity = Gravity.TOP | Gravity.RIGHT;
-                    break;
-                case Constants.DebugFlags.App.RECENTS_CLEAR_ALL_TOP_CENTER:
-                    params.gravity = Gravity.TOP | Gravity.CENTER;
-                    break;
-                case Constants.DebugFlags.App.RECENTS_CLEAR_ALL_BOTTOM_LEFT:
-                    params.gravity = Gravity.BOTTOM | Gravity.LEFT;
-                    break;
-                case Constants.DebugFlags.App.RECENTS_CLEAR_ALL_BOTTOM_RIGHT:
-                default:
-                    params.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-                    break;
-                case Constants.DebugFlags.App.RECENTS_CLEAR_ALL_BOTTOM_CENTER:
-                    params.gravity = Gravity.BOTTOM | Gravity.CENTER;
-                    break;
-            }
-            mFloatingButton.setLayoutParams(params);
-        } else {
-            mFloatingButton.setVisibility(View.GONE);
-        }
-
         // Measure each TaskStackView with the full width and height of the window since the
         // transition view is a child of that stack view
         List<TaskStackView> stackViews = getTaskStackViews();
@@ -390,28 +312,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 stackView.measure(widthMeasureSpec, heightMeasureSpec);
             }
         }
-
         setMeasuredDimension(width, height);
     }
-
-    public void noUserInteraction() {
-        if (mClearRecents != null) {
-            mClearRecents.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow () {
-        super.onAttachedToWindow();
-        mFloatingButton = ((View)getParent()).findViewById(R.id.floating_action_button);
-        mClearRecents = ((View)getParent()).findViewById(R.id.clear_recents);
-        mClearRecents.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                dismissAllTasksAnimated();
-            }
-        });
-    }
-
     /**
      * This is called with the full size of the window since we are handling our own insets.
      */
@@ -425,7 +327,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mSearchBar.layout(searchBarSpaceBounds.left, searchBarSpaceBounds.top,
                     searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);
         }
-
         // Layout each TaskStackView with the full width and height of the window since the 
         // transition view is a child of that stack view
         List<TaskStackView> stackViews = getTaskStackViews();
@@ -438,7 +339,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             }
         }
     }
-
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         // Update the configuration with the latest system insets and trigger a relayout
@@ -446,7 +346,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         requestLayout();
         return insets.consumeSystemWindowInsets();
     }
-
     /** Notifies each task view of the user interaction. */
     public void onUserInteraction() {
         // Get the first stack view
@@ -457,7 +356,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             stackView.onUserInteraction();
         }
     }
-
     /** Focuses the next task in the first stack view */
     public void focusNextTask(boolean forward) {
         // Get the first stack view
@@ -466,7 +364,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             stackViews.get(0).focusNextTask(forward, true);
         }
     }
-
     /** Dismisses the focused task. */
     public void dismissFocusedTask() {
         // Get the first stack view
@@ -475,7 +372,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             stackViews.get(0).dismissFocusedTask();
         }
     }
-
     /** Unfilters any filtered stacks */
     public boolean unfilterFilteredStacks() {
         if (mStacks != null) {
@@ -493,14 +389,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         return false;
     }
-
     public void disableLayersForOneFrame() {
         List<TaskStackView> stackViews = getTaskStackViews();
         for (int i = 0; i < stackViews.size(); i++) {
             stackViews.get(i).disableLayersForOneFrame();
         }
     }
-
     private void postDrawHeaderThumbnailTransitionRunnable(final TaskView tv, final int offsetX,
             final int offsetY, final TaskViewTransform transform,
             final ActivityOptions.OnAnimationStartedListener animStartedListener) {
@@ -511,11 +405,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 if (tv.isFocusedTask()) {
                     tv.unsetFocusedTask();
                 }
-
                 float scale = tv.getScaleX();
                 int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
                 int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
-
                 Bitmap b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
                         Bitmap.Config.ARGB_8888);
                 if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
@@ -558,16 +450,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mCb.runAfterPause(r);
     }
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
-
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
                                   final TaskStack stack, final Task task, final boolean lockToTask) {
-
         // Notify any callbacks of the launching of a new task
         if (mCb != null) {
             mCb.onTaskViewClicked();
         }
-
         // Upfront the processing of the thumbnail
         TaskViewTransform transform = new TaskViewTransform();
         View sourceView;
@@ -586,7 +475,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             sourceView = tv.mThumbnailView;
             transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
         }
-
         // Compute the thumbnail to scale up from
         final SystemServicesProxy ssp =
                 RecentsTaskLoader.getInstance().getSystemServicesProxy();
@@ -627,7 +515,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                         sourceView.getHandler(), animStartedListener);
             }
         }
-
         final ActivityOptions launchOpts = opts;
         final Runnable launchRunnable = new Runnable() {
             @Override
@@ -648,14 +535,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                         if (mCb != null) {
                             mCb.onTaskLaunchFailed();
                         }
-
                         // Keep track of failed launches
                         MetricsLogger.count(getContext(), "overview_task_launch_failed", 1);
                     }
                 }
             }
         };
-
         // Keep track of the index of the task launch
         int taskIndexFromFront = 0;
         int taskIndex = stack.indexOfTask(task);
@@ -663,7 +548,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
         }
         MetricsLogger.histogram(getContext(), "overview_task_launch_index", taskIndexFromFront);
-
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null) {
             launchRunnable.run();
@@ -679,7 +563,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             }
         }
     }
-
     @Override
     public void onTaskViewAppInfoClicked(Task t) {
         // Create a new task stack with the application info details activity
@@ -691,7 +574,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 .addNextIntentWithParentStack(intent).startActivities(null,
                 new UserHandle(t.key.userId));
     }
-
     @Override
     public void onTaskViewDismissed(Task t) {
         // Remove any stored data from the loader.  We currently don't bother notifying the views
@@ -699,11 +581,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // either don't need to be updated, or have already been removed.
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.deleteTaskData(t, false);
-
         // Remove the old task from activity manager
         loader.getSystemServicesProxy().removeTask(t.key.id);
     }
-
     @Override
     public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks) {
         if (removedTasks != null) {
@@ -712,13 +592,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 onTaskViewDismissed(removedTasks.get(i));
             }
         }
-
         mCb.onAllTaskViewsDismissed();
-
         // Keep track of all-deletions
         MetricsLogger.count(getContext(), "overview_task_all_dismissed", 1);
     }
-
     /** Final callback after Recents is finally hidden. */
     public void onRecentsHidden() {
         // Notify each task stack view
@@ -729,7 +606,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             stackView.onRecentsHidden();
         }
     }
-
     @Override
     public void onTaskStackFilterTriggered() {
         // Hide the search bar
@@ -743,7 +619,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     .start();
         }
     }
-
     @Override
     public void onTaskStackUnfilterTriggered() {
         // Show the search bar
@@ -757,16 +632,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     .start();
         }
     }
-
     @Override
     public void onTaskResize(Task t) {
         if (mCb != null) {
             mCb.onTaskResize(t);
         }
     }
-
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
-
     @Override
     public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
         // Propagate this event down to each task stack view

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.recents.views;
-
 import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,7 +27,6 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -42,20 +39,16 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.statusbar.DismissView;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
-
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, TaskStackViewScroller.TaskStackViewScrollerCallbacks,
         ViewPool.ViewPoolConsumer<TaskView, Task>, RecentsPackageMonitor.PackageCallbacks {
-
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
         public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
@@ -65,11 +58,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks);
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
-
         public void onTaskResize(Task t);
     }
     RecentsConfiguration mConfig;
-
     TaskStack mStack;
     TaskStackViewLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewFilterAlgorithm mFilterAlgorithm;
@@ -103,7 +94,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     List<TaskView> mImmutableTaskViews = new ArrayList<TaskView>();
     LayoutInflater mInflater;
     boolean mLayersDisabled;
-
     // A convenience update listener to request updating clipping of tasks
     ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -112,7 +102,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             requestUpdateStackViewsClip();
         }
     };
-
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
         // Set the stack first
@@ -139,12 +128,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         });
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
-
     /** Sets the callbacks */
     void setCallbacks(TaskStackViewCallbacks cb) {
         mCb = cb;
     }
-
     /** Sets the task stack */
     void setStack(TaskStack stack) {
         // Set the new stack
@@ -155,17 +142,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Layout again with the new stack
         requestLayout();
     }
-
     /** Returns the task stack. */
     TaskStack getStack() {
         return mStack;
     }
-
     /** Sets the debug overlay */
     public void setDebugOverlay(DebugOverlayView overlay) {
         mDebugOverlay = overlay;
     }
-
     /** Updates the list of task views */
     void updateTaskViewsList() {
         mTaskViews.clear();
@@ -178,24 +162,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         mImmutableTaskViews = Collections.unmodifiableList(mTaskViews);
     }
-
     /** Gets the list of task views */
     List<TaskView> getTaskViews() {
         return mImmutableTaskViews;
     }
-
     /** Resets this TaskStackView for reuse. */
     void reset() {
         // Reset the focused task
         resetFocusedTask();
-
         // Return all the views to the pool
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             mViewPool.returnViewToPool(taskViews.get(i));
         }
-
         // Mark each task view for relayout
         if (mViewPool != null) {
             Iterator<TaskView> iter = mViewPool.poolViewIterator();
@@ -206,7 +186,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
         }
-
         // Reset the stack state
         mStack.reset();
         mStackViewsDirty = true;
@@ -219,7 +198,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         mStackScroller.reset();
     }
-
     /** Requests that the views be synchronized with the model */
     void requestSynchronizeStackViewsWithModel() {
         requestSynchronizeStackViewsWithModel(0);
@@ -236,7 +214,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStackViewsAnimationDuration = Math.max(mStackViewsAnimationDuration, duration);
         }
     }
-
     /** Requests that the views clipping be updated. */
     void requestUpdateStackViewsClip() {
         if (!mStackViewsClipDirty) {
@@ -244,7 +221,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStackViewsClipDirty = true;
         }
     }
-
     /** Finds the child view given a specific task. */
     public TaskView getChildViewForTask(Task t) {
         List<TaskView> taskViews = getTaskViews();
@@ -257,12 +233,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         return null;
     }
-
     /** Returns the stack algorithm for this task stack. */
     public TaskStackViewLayoutAlgorithm getStackAlgorithm() {
         return mLayoutAlgorithm;
     }
-
     /**
      * Gets the stack transforms of a list of tasks, and returns the visible range of tasks.
      */
@@ -275,7 +249,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
         int backMostVisibleIndex = -1;
-
         // We can reuse the task transforms where possible to reduce object allocation
         if (taskTransformCount < taskCount) {
             // If there are less transforms than tasks, then add as many transforms as necessary
@@ -286,7 +259,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // If there are more transforms than tasks, then just subset the transform list
             taskTransforms.subList(0, taskCount);
         }
-
         // Update the stack transforms
         TaskViewTransform prevTransform = null;
         for (int i = taskCount - 1; i >= 0; i--) {
@@ -308,7 +280,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     break;
                 }
             }
-
             if (boundTranslationsToRect) {
                 transform.translationY = Math.min(transform.translationY,
                         mLayoutAlgorithm.mViewRect.bottom);
@@ -321,13 +292,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         return frontMostVisibleIndex != -1 && backMostVisibleIndex != -1;
     }
-
     /** Synchronizes the views with the model */
     boolean synchronizeStackViewsWithModel() {
         if (mStackViewsDirty) {
             RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
             SystemServicesProxy ssp = loader.getSystemServicesProxy();
-
             // Get all the task transforms
             ArrayList<Task> tasks = mStack.getTasks();
             float stackScroll = mStackScroller.getStackScroll();
@@ -337,7 +306,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (mDebugOverlay != null) {
                 mDebugOverlay.setText("vis[" + visibleRange[1] + "-" + visibleRange[0] + "]");
             }
-
             // Inflate and add the dismiss button if necessary
             if (Constants.DebugFlags.App.EnableDismissAll && mDismissAllButton == null) {
                 mDismissAllButton = (DismissView)
@@ -350,7 +318,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 });
                 addView(mDismissAllButton, 0);
             }
-
             // Return all the invisible children to the pool
             mTmpTaskViewMap.clear();
             List<TaskView> taskViews = getTaskViews();
@@ -365,21 +332,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 } else {
                     mViewPool.returnViewToPool(tv);
                     reaquireAccessibilityFocus |= (i == mPrevAccessibilityFocusedIndex);
-
                     // Hide the dismiss button if the front most task is invisible
                     if (task == mStack.getFrontMostTask()) {
                         hideDismissAllButton(null);
                     }
                 }
             }
-
             // Pick up all the newly visible children and update all the existing children
             for (int i = visibleRange[0]; isValidVisibleRange && i >= visibleRange[1]; i--) {
                 Task task = tasks.get(i);
                 TaskViewTransform transform = mCurrentTaskTransforms.get(i);
                 TaskView tv = mTmpTaskViewMap.get(task);
                 int taskIndex = mStack.indexOfTask(task);
-
                 if (tv == null) {
                     tv = mViewPool.pickUpViewFromPool(task, task);
                     if (mLayersDisabled) {
@@ -395,18 +359,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         }
                         tv.updateViewPropertiesToTaskTransform(mTmpTransform, 0);
                     }
-
                     // If we show the front most task view then ensure that the dismiss button
                     // is visible too.
                     if (!mAwaitingFirstLayout && (task == mStack.getFrontMostTask())) {
                         showDismissAllButton();
                     }
                 }
-
                 // Animate the task into place
                 tv.updateViewPropertiesToTaskTransform(mCurrentTaskTransforms.get(taskIndex),
                         mStackViewsAnimationDuration, mRequestUpdateClippingListener);
-
                 // Request accessibility focus on the next view if we removed the task
                 // that previously held accessibility focus
                 if (reaquireAccessibilityFocus) {
@@ -423,7 +384,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     }
                 }
             }
-
             // Reset the request-synchronize params
             mStackViewsAnimationDuration = 0;
             mStackViewsDirty = false;
@@ -432,7 +392,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         return false;
     }
-
     /** Updates the clip for each of the task views. */
     void clipTaskViews() {
         // Update the clip on each task child
@@ -453,7 +412,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         break;
                     }
                 }
-
                 // Clip against the next view, this is just an approximation since we are
                 // stacked and we can make assumptions about the visibility of the this
                 // task relative to the ones in front of it.
@@ -476,38 +434,31 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         mStackViewsClipDirty = false;
     }
-
     /** The stack insets to apply to the stack contents */
     public void setStackInsetRect(Rect r) {
         mTaskStackBounds.set(r);
     }
-
     /** Updates the min and max virtual scroll bounds */
     void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab,
             boolean launchedFromHome) {
         // Compute the min and max scroll values
         mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab, launchedFromHome);
-
         // Debug logging
         if (boundScrollToNewMinMax) {
             mStackScroller.boundScroll();
         }
     }
-
     /** Returns the scroller. */
     public TaskStackViewScroller getScroller() {
         return mStackScroller;
     }
-
     /** Focuses the task at the specified index in the stack */
     void focusTask(int taskIndex, boolean scrollToNewPosition, final boolean animateFocusedState) {
         // Return early if the task is already focused
         if (taskIndex == mFocusedTaskIndex) return;
-
         if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
             mFocusedTaskIndex = taskIndex;
             mPrevAccessibilityFocusedIndex = taskIndex;
-
             // Focus the view if possible, otherwise, focus the view after we scroll into position
             final Task t = mStack.getTasks().get(mFocusedTaskIndex);
             Runnable postScrollRunnable = new Runnable() {
@@ -520,7 +471,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     }
                 }
             };
-
             // Scroll the view into position (just center it in the curve)
             if (scrollToNewPosition) {
                 float newScroll = mLayoutAlgorithm.getStackScrollForTask(t) - 0.5f;
@@ -531,10 +481,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     postScrollRunnable.run();
                 }
             }
-
         }
     }
-
     /**
      * Ensures that there is a task focused, if nothing is focused, then we will use the task
      * at the center of the visible stack.
@@ -567,7 +515,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         return mFocusedTaskIndex >= 0;
     }
-
     /**
      * Focuses the next task in the stack.
      * @param animateFocusedState determines whether to actually draw the highlight along with
@@ -578,7 +525,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Find the next index to focus
         int numTasks = mStack.getTaskCount();
         if (numTasks == 0) return;
-
         int direction = (forward ? -1 : 1);
         int newIndex = mFocusedTaskIndex + direction;
         if (newIndex >= 0 && newIndex <= (numTasks - 1)) {
@@ -586,7 +532,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             focusTask(newIndex, true, animateFocusedState);
         }
     }
-
     /** Dismisses the focused task. */
     public void dismissFocusedTask() {
         // Return early if the focused task index is invalid
@@ -594,12 +539,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mFocusedTaskIndex = -1;
             return;
         }
-
         Task t = mStack.getTasks().get(mFocusedTaskIndex);
         TaskView tv = getChildViewForTask(t);
         tv.dismissTask();
     }
-
     /** Resets the focused task. */
     void resetFocusedTask() {
         if ((0 <= mFocusedTaskIndex) && (mFocusedTaskIndex < mStack.getTaskCount())) {
@@ -612,7 +555,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mFocusedTaskIndex = -1;
         mPrevAccessibilityFocusedIndex = -1;
     }
-
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
@@ -629,7 +571,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         event.setScrollY(mStackScroller.mScroller.getCurrY());
         event.setMaxScrollY(mStackScroller.progressToScrollRange(mLayoutAlgorithm.mMaxScrollP));
     }
-
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
@@ -645,12 +586,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
     }
-
     @Override
     public CharSequence getAccessibilityClassName() {
         return TaskStackView.class.getName();
     }
-
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         if (super.performAccessibilityAction(action, arguments)) {
@@ -676,27 +615,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         return false;
     }
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mTouchHandler.onInterceptTouchEvent(ev);
     }
-
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return mTouchHandler.onTouchEvent(ev);
     }
-
     @Override
     public boolean onGenericMotionEvent(MotionEvent ev) {
         return mTouchHandler.onGenericMotionEvent(ev);
     }
-
     /** Returns the region that touch gestures can be started in. */
     Rect getTouchableRegion() {
         return mTaskStackBounds;
     }
-
     @Override
     public void computeScroll() {
         mStackScroller.computeScroll();
@@ -707,17 +641,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Notify accessibility
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
     }
-
     /** Computes the stack and task rects */
     public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds,
             boolean launchedWithAltTab, boolean launchedFromHome) {
         // Compute the rects in the stack algorithm
         mLayoutAlgorithm.computeRects(windowWidth, windowHeight, taskStackBounds);
-
         // Update the scroll bounds
         updateMinMaxScroll(false, launchedWithAltTab, launchedFromHome);
     }
-
     /**
      * This is ONLY used from AlternateRecentsComponent to update the dummy stack view for purposes
      * of getting the task rect to animate to.
@@ -727,7 +658,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStack = stack;
         updateMinMaxScroll(false, launchedWithAltTab, launchedFromHome);
     }
-
     /**
      * Computes the maximum number of visible tasks and thumbnails.  Requires that
      * updateMinMaxScrollForStack() is called first.
@@ -735,7 +665,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public TaskStackViewLayoutAlgorithm.VisibilityReport computeStackVisibilityReport() {
         return mLayoutAlgorithm.computeStackVisibilityReport(mStack.getTasks());
     }
-
     /**
      * This is called with the full window width and height to allow stack view children to
      * perform the full screen transition down.
@@ -744,13 +673,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-
         // Compute our stack/task rects
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mConfig.systemInsets.bottom;
         computeRects(width, height, taskStackBounds, mConfig.launchedWithAltTab,
                 mConfig.launchedFromHome);
-
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views
         if (mAwaitingFirstLayout) {
@@ -758,7 +685,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
         }
-
         // Measure each of the TaskViews
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
@@ -777,7 +703,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom,
                         MeasureSpec.EXACTLY));
         }
-
         // Measure the dismiss button
         if (mDismissAllButton != null) {
             int taskRectWidth = mLayoutAlgorithm.mTaskRect.width();
@@ -785,10 +710,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     MeasureSpec.makeMeasureSpec(taskRectWidth, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mConfig.dismissAllButtonSizePx, MeasureSpec.EXACTLY));
         }
-
         setMeasuredDimension(width, height);
     }
-
     /**
      * This is called with the size of the space not including the top or right insets, or the
      * search bar height in portrait (but including the search bar width in landscape, since we want
@@ -811,7 +734,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mLayoutAlgorithm.mTaskRect.right + mTmpRect.right,
                     mLayoutAlgorithm.mTaskRect.bottom + mTmpRect.bottom);
         }
-
         // Layout the dismiss button at the top of the screen, and just translate it accordingly
         // when synchronizing the views with the model to attach it to the bottom of the front-most
         // task view
@@ -820,18 +742,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mLayoutAlgorithm.mTaskRect.left + mDismissAllButton.getMeasuredWidth(),
                     mDismissAllButton.getMeasuredHeight());
         }
-
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
             onFirstLayout();
         }
     }
-
     /** Handler for the first layout. */
     void onFirstLayout() {
         int offscreenY = mLayoutAlgorithm.mViewRect.bottom -
                 (mLayoutAlgorithm.mTaskRect.top - mLayoutAlgorithm.mViewRect.top);
-
         // Find the launch target task
         Task launchTargetTask = null;
         List<TaskView> taskViews = getTaskViews();
@@ -844,7 +763,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 break;
             }
         }
-
         // Prepare the first view for its enter animation
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
@@ -853,7 +771,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
             tv.prepareEnterRecentsAnimation(task.isLaunchTarget, occludesLaunchTarget, offscreenY);
         }
-
         // If the enter animation started already and we haven't completed a layout yet, do the
         // enter animation now
         if (mStartEnterAnimationRequestedAfterLayout) {
@@ -861,7 +778,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStartEnterAnimationRequestedAfterLayout = false;
             mStartEnterAnimationContext = null;
         }
-
         // When Alt-Tabbing, focus the previous task (but leave the animation until we finish the
         // enter animation).
         if (mConfig.launchedWithAltTab) {
@@ -873,13 +789,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         mConfig.launchedHasConfigurationChanged);
             }
         }
-
         // Start dozing
         if (!mConfig.multiStackEnabled) {
             mUIDozeTrigger.startDozing();
         }
     }
-
     /** Requests this task stacks to start it's enter-recents animation */
     public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         // If we are still waiting to layout, then just defer until then
@@ -888,7 +802,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStartEnterAnimationContext = ctx;
             return;
         }
-
         if (mStack.getTaskCount() > 0) {
             // Find the launch target task
             Task launchTargetTask = null;
@@ -902,7 +815,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     break;
                 }
             }
-
             // Animate all the task views into view
             for (int i = taskViewCount - 1; i >= 0; i--) {
                 TaskView tv = taskViews.get(i);
@@ -917,7 +829,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(), ctx.currentTaskTransform, null);
                 tv.startEnterRecentsAnimation(ctx);
             }
-
             // Add a runnable to the post animation ref counter to clear all the views
             ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
@@ -925,7 +836,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mStartEnterAnimationCompleted = true;
                     // Poke the dozer to restart the trigger after the animation completes
                     mUIDozeTrigger.poke();
-
                     RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
                     SystemServicesProxy ssp = loader.getSystemServicesProxy();
                     List<TaskView> taskViews = getTaskViews();
@@ -938,7 +848,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                             mPrevAccessibilityFocusedIndex = mStack.indexOfTask(tv.getTask());
                         }
                     }
-
                     // Start the focus animation when alt-tabbing
                     ArrayList<Task> tasks = mStack.getTasks();
                     if (mConfig.launchedWithAltTab && !mConfig.launchedHasConfigurationChanged &&
@@ -948,14 +857,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                             tv.setFocusedTask(true);
                         }
                     }
-
                     // Show the dismiss button
                     showDismissAllButton();
                 }
             });
         }
     }
-
     /** Requests this task stack to start it's exit-recents animation. */
     public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         // Stop any scrolling
@@ -966,7 +873,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 (mLayoutAlgorithm.mTaskRect.top - mLayoutAlgorithm.mViewRect.top);
         // Animate the dismiss-all button
         hideDismissAllButton(null);
-
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
@@ -974,7 +880,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             tv.startExitToHomeAnimation(ctx);
         }
     }
-
     /** Requests this task stack to start it's dismiss-all animation. */
     public void startDismissAllAnimation(final Runnable postAnimationRunnable) {
         // Clear the focused task
@@ -994,7 +899,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         });
     }
-
     /** Animates a task view in this stack as it launches. */
     public void startLaunchTaskAnimation(TaskView tv, Runnable r, boolean lockToTask) {
         Task launchTargetTask = tv.getTask();
@@ -1012,11 +916,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
     }
-
     /** Shows the dismiss button */
     void showDismissAllButton() {
         if (mDismissAllButton == null) return;
-
         if (mDismissAllButtonAnimating || mDismissAllButton.getVisibility() != View.VISIBLE ||
                 Float.compare(mDismissAllButton.getAlpha(), 0f) == 0) {
             mDismissAllButtonAnimating = true;
@@ -1036,11 +938,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     .start();
         }
     }
-
     /** Hides the dismiss button */
     void hideDismissAllButton(final Runnable postAnimRunnable) {
         if (mDismissAllButton == null) return;
-
         mDismissAllButtonAnimating = true;
         mDismissAllButton.animate()
                 .alpha(0f)
@@ -1057,11 +957,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 })
                 .start();
     }
-
     /** Updates the dismiss button position */
     void updateDismissButtonPosition() {
         if (mDismissAllButton == null) return;
-
         // Update the position of the clear-all button to hang it off the first task view
         if (mStack.getTaskCount() > 0) {
             mTmpCoord[0] = mTmpCoord[1] = 0;
@@ -1075,28 +973,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
     }
-
     /** Final callback after Recents is finally hidden. */
     void onRecentsHidden() {
         reset();
     }
-
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
         return isTransformedTouchPointInView(x, y, child, null);
     }
-
     /** Pokes the dozer on user interaction. */
     void onUserInteraction() {
         // Poke the doze trigger if it is dozing
         mUIDozeTrigger.poke();
     }
-
     @Override
     protected void dispatchDraw(Canvas canvas) {
         mLayersDisabled = false;
         super.dispatchDraw(canvas);
     }
-
     public void disableLayersForOneFrame() {
         mLayersDisabled = true;
         List<TaskView> taskViews = getTaskViews();
@@ -1104,14 +997,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             taskViews.get(i).disableLayersForOneFrame();
         }
     }
-
     /**** TaskStackCallbacks Implementation ****/
-
     @Override
     public void onStackTaskAdded(TaskStack stack, Task t) {
         requestSynchronizeStackViewsWithModel();
     }
-
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask) {
         // Remove the view associated with this task, we can't rely on updateTransforms
@@ -1120,7 +1010,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (tv != null) {
             mViewPool.returnViewToPool(tv);
         }
-
         // Get the stack scroll of the task to anchor to (since we are removing something, the front
         // most task will be our anchor task)
         Task anchorTask = null;
@@ -1130,10 +1019,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             anchorTask = mStack.getFrontMostTask();
             prevAnchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
         }
-
         // Update the min/max scroll and animate other task views into their new positions
         updateMinMaxScroll(true, mConfig.launchedWithAltTab, mConfig.launchedFromHome);
-
         // Offset the stack by as much as the anchor task would otherwise move back
         if (pullStackForward) {
             float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
@@ -1141,10 +1028,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     - prevAnchorTaskScroll));
             mStackScroller.boundScroll();
         }
-
         // Animate all the tasks into place
         requestSynchronizeStackViewsWithModel(200);
-
         // Update the new front most task
         if (newFrontMostTask != null) {
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
@@ -1153,7 +1038,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 frontTv.fadeInActionButton(0, mConfig.taskViewEnterFromAppDuration);
             }
         }
-
         // If there are no remaining tasks, then either unfilter the current stack, or just close
         // the activity if there are no filtered stacks
         if (mStack.getTaskCount() == 0) {
@@ -1169,19 +1053,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Fade the dismiss button back in
             showDismissAllButton();
         }
-
         // Notify the callback that we've removed the task and it can clean up after it. Note, we
         // do this after onAllTaskViewsDismissed() is called, to allow the home activity to be
         // started before the call to remove the task.
         mCb.onTaskViewDismissed(removedTask);
     }
-
     @Override
     public void onStackAllTasksRemoved(TaskStack stack, final ArrayList<Task> removedTasks) {
         // Announce for accessibility
         String msg = getContext().getString(R.string.accessibility_recents_all_items_dismissed);
         announceForAccessibility(msg);
-
         startDismissAllAnimation(new Runnable() {
             @Override
             public void run() {
@@ -1190,129 +1071,100 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         });
     }
-
     @Override
     public void onStackFiltered(TaskStack newStack, final ArrayList<Task> curTasks,
                                 Task filteredTask) {
         /*
         // Stash the scroll and filtered task for us to restore to when we unfilter
         mStashedScroll = getStackScroll();
-
         // Calculate the current task transforms
         ArrayList<TaskViewTransform> curTaskTransforms =
                 getStackTransforms(curTasks, getStackScroll(), null, true);
-
         // Update the task offsets
         mLayoutAlgorithm.updateTaskOffsets(mStack.getTasks());
-
         // Scroll the item to the top of the stack (sans-peek) rect so that we can see it better
         updateMinMaxScroll(false);
         float overlapHeight = mLayoutAlgorithm.getTaskOverlapHeight();
         setStackScrollRaw((int) (newStack.indexOfTask(filteredTask) * overlapHeight));
         boundScrollRaw();
-
         // Compute the transforms of the items in the new stack after setting the new scroll
         final ArrayList<Task> tasks = mStack.getTasks();
         final ArrayList<TaskViewTransform> taskTransforms =
                 getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
-
         // Animate
         mFilterAlgorithm.startFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
-
         // Notify any callbacks
         mCb.onTaskStackFilterTriggered();
         */
     }
-
     @Override
     public void onStackUnfiltered(TaskStack newStack, final ArrayList<Task> curTasks) {
         /*
         // Calculate the current task transforms
         final ArrayList<TaskViewTransform> curTaskTransforms =
                 getStackTransforms(curTasks, getStackScroll(), null, true);
-
         // Update the task offsets
         mLayoutAlgorithm.updateTaskOffsets(mStack.getTasks());
-
         // Restore the stashed scroll
         updateMinMaxScroll(false);
         setStackScrollRaw(mStashedScroll);
         boundScrollRaw();
-
         // Compute the transforms of the items in the new stack after restoring the stashed scroll
         final ArrayList<Task> tasks = mStack.getTasks();
         final ArrayList<TaskViewTransform> taskTransforms =
                 getStackTransforms(tasks, getStackScroll(), null, true);
-
         // Animate
         mFilterAlgorithm.startFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
-
         // Clear the saved vars
         mStashedScroll = 0;
-
         // Notify any callbacks
         mCb.onTaskStackUnfilterTriggered();
         */
     }
-
     /**** ViewPoolConsumer Implementation ****/
-
     @Override
     public TaskView createView(Context context) {
         return (TaskView) mInflater.inflate(R.layout.recents_task_view, this, false);
     }
-
     @Override
     public void prepareViewToEnterPool(TaskView tv) {
         Task task = tv.getTask();
-
         // Clear the accessibility focus for that view
         if (tv.isAccessibilityFocused()) {
             tv.clearAccessibilityFocus();
         }
-
         // Report that this tasks's data is no longer being used
         RecentsTaskLoader.getInstance().unloadTaskData(task);
-
         // Detach the view from the hierarchy
         detachViewFromParent(tv);
         // Update the task views list after removing the task view
         updateTaskViewsList();
-
         // Reset the view properties
         tv.resetViewProperties();
-
         // Reset the clip state of the task view
         tv.setClipViewInStack(false);
     }
-
     @Override
     public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
         // It is possible for a view to be returned to the view pool before it is laid out,
         // which means that we will need to relayout the view when it is first used next.
         boolean requiresRelayout = tv.getWidth() <= 0 && !isNewView;
-
         // Rebind the task and request that this task's data be filled into the TaskView
         tv.onTaskBound(task);
-
         // Load the task data
         RecentsTaskLoader.getInstance().loadTaskData(task);
-
         // If the doze trigger has already fired, then update the state for this task view
         if (mConfig.multiStackEnabled || mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
         }
-
         // If we've finished the start animation, then ensure we always enable the focus animations
         if (mStartEnterAnimationCompleted) {
             tv.enableFocusAnimations();
         }
-
         // Find the index where this task should be placed in the stack
         int insertIndex = -1;
         int taskIndex = mStack.indexOfTask(task);
         if (taskIndex != -1) {
-
             List<TaskView> taskViews = getTaskViews();
             int taskViewCount = taskViews.size();
             for (int i = 0; i < taskViewCount; i++) {
@@ -1324,7 +1176,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
         }
-
         // Add/attach the view to the hierarchy
         if (isNewView) {
             addView(tv, insertIndex);
@@ -1336,20 +1187,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         // Update the task views list after adding the new task view
         updateTaskViewsList();
-
         // Set the new state for this view, including the callbacks and view clipping
         tv.setCallbacks(this);
         tv.setTouchEnabled(true);
         tv.setClipViewInStack(true);
     }
-
     @Override
     public boolean hasPreferredData(TaskView tv, Task preferredData) {
         return (tv.getTask() == preferredData);
     }
-
     /**** TaskViewCallbacks Implementation ****/
-
     @Override
     public void onTaskViewAppIconClicked(TaskView tv) {
         if (Constants.DebugFlags.App.EnableTaskFiltering) {
@@ -1360,27 +1207,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
     }
-
     @Override
     public void onTaskViewAppInfoClicked(TaskView tv) {
         if (mCb != null) {
             mCb.onTaskViewAppInfoClicked(tv.getTask());
-
             // Keep track of app-info invocations
             MetricsLogger.count(getContext(), "overview_app_info", 1);
         }
     }
-
     @Override
     public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask) {
         // Cancel any doze triggers
         mUIDozeTrigger.stopDozing();
-
         if (mCb != null) {
             mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask);
         }
     }
-
     @Override
     public void onTaskViewDismissed(TaskView tv) {
         Task task = tv.getTask();
@@ -1406,45 +1248,37 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
     }
-
     @Override
     public void onTaskViewClipStateChanged(TaskView tv) {
         if (!mStackViewsDirty) {
             invalidate();
         }
     }
-
     @Override
     public void onTaskViewFocusChanged(TaskView tv, boolean focused) {
         if (focused) {
             mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
         }
     }
-
     @Override
     public void onTaskResize(TaskView tv) {
         if (mCb != null) {
             mCb.onTaskResize(tv.getTask());
         }
     }
-
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/
-
     @Override
     public void onScrollChanged(float p) {
         mUIDozeTrigger.poke();
         requestSynchronizeStackViewsWithModel();
         postInvalidateOnAnimation();
     }
-
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
-
     @Override
     public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
         // Compute which components need to be removed
         HashSet<ComponentName> removedComponents = monitor.computeComponentsRemoved(
                 mStack.getTaskKeys(), packageName, userId);
-
         // For other tasks, just remove them directly if they no longer exist
         ArrayList<Task> tasks = mStack.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
